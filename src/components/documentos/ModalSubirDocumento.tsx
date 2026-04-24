@@ -19,7 +19,7 @@ const TIPO_LABELS: Record<TipoDocumento, { label: string; desc: string; color: s
 
 interface Props {
     practicaId: string;
-    tipoDocumento: TipoDocumento;
+    tipoDocumento?: TipoDocumento;
     onClose: () => void;
     onSuccess: () => void;
 }
@@ -35,8 +35,11 @@ function iStyle(focused: boolean, color: string): React.CSSProperties {
     };
 }
 
-export default function ModalSubirDocumento({ practicaId, tipoDocumento, onClose, onSuccess }: Props) {
+export default function ModalSubirDocumento({ practicaId, tipoDocumento: tipoExterno, onClose, onSuccess }: Props) {
+    const [tipoSeleccionado, setTipoSeleccionado] = useState<TipoDocumento>(tipoExterno ?? "INICIACION");
+    const tipoDocumento = tipoExterno ?? tipoSeleccionado;
     const meta = TIPO_LABELS[tipoDocumento];
+    const seleccionLibre = !tipoExterno;
     const [titulo, setTitulo] = useState("");
     const [descripcion, setDescripcion] = useState("");
     const [archivo, setArchivo] = useState<File | null>(null);
@@ -122,7 +125,28 @@ export default function ModalSubirDocumento({ practicaId, tipoDocumento, onClose
                     </button>
                 </div>
 
-                {/* badge de fase */}
+                {/* selector de fase (solo cuando tipoDocumento no viene desde fuera) */}
+                {seleccionLibre && (
+                    <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--color-border)" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-text-muted)", display: "block", marginBottom: "6px", letterSpacing: "0.02em" }}>Fase de entrega *</label>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                            {(Object.keys(TIPO_LABELS) as TipoDocumento[]).map(k => {
+                                const t = TIPO_LABELS[k];
+                                const active = tipoSeleccionado === k;
+                                return (
+                                    <button key={k} type="button" onClick={() => setTipoSeleccionado(k)}
+                                        style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "var(--radius-lg)", border: `1px solid ${active ? t.border : "var(--color-border)"}`, backgroundColor: active ? t.bg : "transparent", cursor: "pointer", transition: "all 150ms ease", textAlign: "left" }}>
+                                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: t.color, flexShrink: 0 }} />
+                                        <span style={{ fontSize: "11px", fontWeight: active ? 600 : 400, color: active ? t.color : "var(--color-text-muted)" }}>{t.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* badge de fase (solo cuando viene desde fuera — bloqueado) */}
+                {!seleccionLibre && (
                 <div style={{ padding: "10px 18px", borderBottom: "1px solid var(--color-border)", backgroundColor: BG }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <Lock size={11} style={{ color: ACCENT }} />
@@ -132,6 +156,7 @@ export default function ModalSubirDocumento({ practicaId, tipoDocumento, onClose
                         </div>
                     </div>
                 </div>
+                )}
 
                 <form onSubmit={handleSubmit} style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "12px" }}>
                     {/* título */}
