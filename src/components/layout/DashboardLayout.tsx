@@ -42,9 +42,10 @@ const NAV_ESTUDIANTE = [
 const NAV_UNIVERSIDAD = [
     { href: "/dashboard/universidad", icon: <LayoutDashboard size={15} />, label: "Inicio" },
     { href: "/dashboard/universidad/practicantes", icon: <Users size={15} />, label: "Practicantes" },
-    { href: "/dashboard/universidad/documentos", icon: <FileText size={15} />, label: "Documentos" },
-    { href: "/dashboard/universidad/estadisticas", icon: <BarChart2 size={15} />, label: "Estadísticas" },
+    { href: "/dashboard/universidad/reportes", icon: <FileText size={15} />, label: "Documentos" },
+    { href: "/dashboard/universidad/analiticas", icon: <BarChart2 size={15} />, label: "Estadísticas" },
 ];
+
 const NAV_EMPRESA = [
     { href: "/dashboard/empresa", icon: <LayoutDashboard size={15} />, label: "Inicio" },
     { href: "/dashboard/empresa/practicantes", icon: <Users size={15} />, label: "Practicantes" },
