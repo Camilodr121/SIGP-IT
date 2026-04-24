@@ -425,12 +425,12 @@ export default function DashboardUniversidad() {
                                         onClick={() => setModal({ tipo: "crearEmpresa" })}
                                         style={{
                                             display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px",
-                                            borderRadius: "var(--radius-lg)", border: "1px solid rgba(245,130,32,0.3)",
-                                            backgroundColor: "transparent", color: "var(--color-role-empresa)",
+                                            borderRadius: "var(--radius-lg)", border: "1px solid rgba(167,139,250,0.3)",
+                                            backgroundColor: "transparent", color: "var(--color-role-universidad)",
                                             fontSize: "11px", fontWeight: 600, cursor: "pointer",
                                             transition: "background var(--transition-fast)",
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "var(--color-role-empresa-bg)"; }}
+                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "var(--color-role-universidad-bg)"; }}
                                         onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
                                     >
                                         <Building2 size={12} /><Plus size={10} />Agregar empresa
@@ -453,7 +453,7 @@ export default function DashboardUniversidad() {
                                             <div>
                                                 {u.perfilEmpresa
                                                     ? <Badge color="success"><CheckCircle size={10} />Perfil completo</Badge>
-                                                    : <ActionBtn color="empresa" onClick={() => setModal({ tipo: "perfilEmpresa", usuario: u })}>Crear perfil</ActionBtn>
+                                                    : <ActionBtn color="uni" onClick={() => setModal({ tipo: "perfilEmpresa", usuario: u })}>Crear perfil</ActionBtn>
                                                 }
                                             </div>
                                         </div>

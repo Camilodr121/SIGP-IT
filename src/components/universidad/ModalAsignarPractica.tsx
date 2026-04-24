@@ -119,7 +119,7 @@ function Field({
 function inputStyle(focused: boolean, accentColor: string): React.CSSProperties {
     return {
         width: "100%", padding: "9px 12px",
-        backgroundColor: focused ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.03)",
+        backgroundColor: focused ? "rgba(255,255,255,0.05)" : "rgba(13,14,21,0.8)",
         border: `1px solid ${focused ? accentColor + "80" : "var(--color-border)"}`,
         borderRadius: "var(--radius-lg)",
         color: "var(--color-text)", fontSize: "12px",
@@ -184,9 +184,9 @@ export default function ModalAsignarPractica({ onClose, onSuccess }: Props) {
     const [error, setError] = useState("");
     const [focused, setFocused] = useState("");
 
-    const AC = "var(--color-accent)";
-    const ABg = "var(--color-accent-subtle)";
-    const ABr = "var(--color-accent-border)";
+    const AC = "var(--color-role-universidad)";
+    const ABg = "var(--color-role-universidad-bg)";
+    const ABr = "rgba(167,139,250,0.3)";
 
     useEffect(() => {
         Promise.all([
@@ -226,7 +226,7 @@ export default function ModalAsignarPractica({ onClose, onSuccess }: Props) {
         onSuccess();
     };
 
-    const fStyle = (name: string) => inputStyle(focused === name, "var(--color-accent-raw, #34c97a)");
+    const fStyle = (name: string) => inputStyle(focused === name, "var(--color-role-universidad)");
 
     return (
         <ModalShell onClose={onClose} accentColor={AC} accentBg={ABg} accentBorder={ABr}>
