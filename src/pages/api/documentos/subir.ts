@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const titulo = fields.titulo?.[0];
     const descripcion = fields.descripcion?.[0] ?? null;
     const practicaId = fields.practicaId?.[0];
+    const tipoDocumento = fields.tipoDocumento?.[0] ?? null;
     const archivo = files.archivo?.[0] as File | undefined;
 
     if (!titulo || !practicaId || !archivo) {
@@ -78,8 +79,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             practicaId,
             archivoUrl: urlData.publicUrl,
             estado: "PENDIENTE",
+            ...(tipoDocumento && { tipoDocumento }),
         },
     });
+
 
     return res.status(201).json({ data: documento });
 }

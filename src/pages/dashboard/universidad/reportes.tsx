@@ -239,8 +239,14 @@ function PracticaCard({ practica, refetch }: { practica: any; refetch: () => voi
     const docs = practica.documentos ?? [];
     const pendientes = docs.filter((d: any) => d.estado === "PENDIENTE").length;
 
-    // Clasificar docs por tipoDocumento
-    const docsPorFase = FASES.map(f => docs.filter((d: any) => d.tipoDocumento === f.key));
+    // Clasificar docs por tipoDocumento.
+    // Docs sin tipo (legacy / subidos antes del selector) van a Iniciación como fallback.
+    const sinTipo = docs.filter((d: any) => !d.tipoDocumento);
+    const docsPorFase = FASES.map((f: any, i: number) => {
+        const conTipo = docs.filter((d: any) => d.tipoDocumento === f.key);
+        return i === 0 ? [...conTipo, ...sinTipo] : conTipo;
+    });
+
 
     const nombre = practica.estudiante?.user?.name ?? "Estudiante";
     const empresa = practica.empresa?.nombreEmpresa ?? "—";
