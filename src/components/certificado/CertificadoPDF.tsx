@@ -1,151 +1,316 @@
+// src/components/certificado/CertificadoPDF.tsx
+// Certificado rediseñado — paleta actualizada del sistema SIGP-IT
 import {
-    Document, Page, Text, View, StyleSheet,
+    Document, Page, Text, View, StyleSheet, Svg, Path, Circle, Line, G,
 } from "@react-pdf/renderer";
 
-// Sin Font.register — usamos Helvetica que viene built-in en @react-pdf/renderer
-// Fuentes built-in disponibles: Helvetica, Courier, Times-Roman (y sus variantes Bold/Oblique)
+/* ─── Paleta de colores ─────────────────────────────────────────────── */
+const C = {
+    navy:       "#0A0B12",   // fondo header — igual al dashboard
+    navyMid:    "#10111C",
+    surface:    "#F8F9FC",   // fondo página
+    surfaceAlt: "#EFF1F7",   // filas alternas
+    border:     "#E2E5EF",
+    purple:     "#A78BFA",   // color-role-universidad
+    purpleDark: "#7C3AED",
+    accent:     "#34C97A",   // color-accent del sistema
+    text:       "#0F1120",
+    textMid:    "#374151",
+    textMuted:  "#6B7280",
+    textFaint:  "#9CA3AF",
+    white:      "#FFFFFF",
+    gold:       "#F59E0B",
+};
 
 const styles = StyleSheet.create({
     page: {
         fontFamily: "Helvetica",
-        backgroundColor: "#ffffff",
-        padding: 60,
+        backgroundColor: C.surface,
         fontSize: 11,
-        color: "#1a1a1a",
+        color: C.text,
     },
-    header: {
+
+    /* ── Header band oscuro ── */
+    headerBand: {
+        backgroundColor: C.navy,
+        paddingHorizontal: 48,
+        paddingTop: 32,
+        paddingBottom: 28,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: 40,
-        paddingBottom: 20,
-        borderBottom: "2px solid #0d9488",
+        alignItems: "center",
     },
-    logoBox: {
-        width: 48,
-        height: 48,
-        backgroundColor: "#0d9488",
+    headerLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 14,
+    },
+    logoWrap: {
+        width: 44,
+        height: 44,
+        backgroundColor: "#1C1D2E",
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
+        border: "1px solid #2A2B40",
     },
-    logoText: {
-        color: "#ffffff",
+    brandName: {
         fontFamily: "Helvetica-Bold",
-        fontSize: 10,
-    },
-    orgName: {
-        fontSize: 18,
-        fontFamily: "Helvetica-Bold",
-        color: "#0d9488",
-    },
-    orgSub: {
-        fontSize: 9,
-        color: "#6b7280",
-        marginTop: 2,
-    },
-    fechaText: {
-        fontSize: 9,
-        color: "#9ca3af",
-        textAlign: "right",
-    },
-    titulo: {
-        fontSize: 18,
-        fontFamily: "Helvetica-Bold",
-        color: "#111827",
-        textAlign: "center",
-        marginBottom: 8,
+        fontSize: 17,
+        color: C.white,
         letterSpacing: 0.5,
     },
-    subtitulo: {
-        fontSize: 10,
-        color: "#6b7280",
-        textAlign: "center",
-        marginBottom: 36,
+    brandSub: {
+        fontSize: 8,
+        color: "#8B8FA8",
+        marginTop: 3,
     },
+    folioBox: {
+        backgroundColor: "#1C1D2E",
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        border: "1px solid #2A2B40",
+        alignItems: "flex-end",
+    },
+    folioLabel: {
+        fontSize: 7,
+        color: "#6B6F8A",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+        marginBottom: 2,
+    },
+    folioValue: {
+        fontFamily: "Helvetica-Bold",
+        fontSize: 9,
+        color: C.purple,
+    },
+    folioDate: {
+        fontSize: 7,
+        color: "#6B6F8A",
+        marginTop: 3,
+    },
+
+    /* ── Accent bar bajo el header ── */
+    accentBar: {
+        height: 3,
+        backgroundColor: C.purpleDark,
+    },
+    accentBarInner: {
+        width: "30%",
+        height: 3,
+        backgroundColor: C.accent,
+    },
+
+    /* ── Cuerpo principal ── */
+    body: {
+        paddingHorizontal: 48,
+        paddingTop: 36,
+        paddingBottom: 100,
+    },
+
+    /* ── Sello central ── */
+    sealRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 24,
+        gap: 14,
+    },
+    sealLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: C.border,
+    },
+    sealTag: {
+        backgroundColor: "#EDE9FE",
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 5,
+        border: "1px solid #C4B5FD",
+    },
+    sealTagText: {
+        fontSize: 8,
+        fontFamily: "Helvetica-Bold",
+        color: C.purpleDark,
+        letterSpacing: 1.2,
+        textTransform: "uppercase",
+    },
+
+    /* ── Título ── */
+    titulo: {
+        fontSize: 20,
+        fontFamily: "Helvetica-Bold",
+        color: C.text,
+        textAlign: "center",
+        letterSpacing: 0.3,
+        marginBottom: 6,
+    },
+    subtitulo: {
+        fontSize: 9,
+        color: C.textMuted,
+        textAlign: "center",
+        marginBottom: 32,
+    },
+
+    /* ── Párrafo ── */
     parrafo: {
-        fontSize: 11,
-        lineHeight: 1.8,
-        color: "#374151",
+        fontSize: 10.5,
+        lineHeight: 1.85,
+        color: C.textMid,
         marginBottom: 16,
         textAlign: "justify",
     },
-    destacado: {
+    bold: {
         fontFamily: "Helvetica-Bold",
-        color: "#111827",
+        color: C.text,
     },
+
+    /* ── Tabla de datos ── */
     tabla: {
-        marginVertical: 24,
+        marginVertical: 22,
+        borderRadius: 8,
+        border: "1px solid #E2E5EF",
+        overflow: "hidden",
+    },
+    tablaHeader: {
+        flexDirection: "row",
+        backgroundColor: C.navy,
+        paddingHorizontal: 16,
+        paddingVertical: 9,
+    },
+    tablaHeaderText: {
+        fontSize: 8,
+        fontFamily: "Helvetica-Bold",
+        color: "#8B8FA8",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+        flex: 1,
     },
     tablaFila: {
         flexDirection: "row",
-        borderBottom: "1px solid #e5e7eb",
+        borderBottom: "1px solid #E2E5EF",
+        backgroundColor: C.white,
     },
     tablaFilaAlterna: {
         flexDirection: "row",
-        borderBottom: "1px solid #e5e7eb",
-        backgroundColor: "#f9fafb",
+        borderBottom: "1px solid #E2E5EF",
+        backgroundColor: C.surfaceAlt,
     },
     tablaCelda: {
         flex: 1,
-        padding: "8 12",
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRight: "1px solid #E2E5EF",
+    },
+    tablaCeldaUltima: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
     },
     tablaCeldaLabel: {
-        fontSize: 9,
-        color: "#9ca3af",
-        marginBottom: 2,
+        fontSize: 7.5,
+        color: C.textFaint,
+        marginBottom: 3,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
     tablaCeldaValor: {
-        fontSize: 11,
+        fontSize: 10.5,
         fontFamily: "Helvetica-Bold",
-        color: "#111827",
+        color: C.text,
     },
+    tablaCeldaValorAccent: {
+        fontSize: 10.5,
+        fontFamily: "Helvetica-Bold",
+        color: C.purpleDark,
+    },
+
+    /* ── Firmas ── */
     firmaSection: {
-        marginTop: 48,
+        marginTop: 40,
         flexDirection: "row",
         justifyContent: "space-between",
+        gap: 32,
     },
     firmaBox: {
-        width: "45%",
+        flex: 1,
         alignItems: "center",
     },
     firmaLinea: {
-        borderTop: "1px solid #d1d5db",
         width: "100%",
-        marginBottom: 8,
+        borderTop: "1.5px solid #C4B5FD",
+        marginBottom: 10,
     },
     firmaNombre: {
-        fontSize: 11,
+        fontSize: 10.5,
         fontFamily: "Helvetica-Bold",
-        color: "#111827",
+        color: C.text,
         textAlign: "center",
     },
     firmaCargo: {
-        fontSize: 9,
-        color: "#6b7280",
+        fontSize: 8.5,
+        color: C.textMuted,
         textAlign: "center",
         marginTop: 2,
     },
+    firmaEmpresa: {
+        fontSize: 8,
+        color: C.purpleDark,
+        textAlign: "center",
+        marginTop: 2,
+        fontFamily: "Helvetica-Bold",
+    },
+
+    /* ── Footer ── */
     footer: {
         position: "absolute",
-        bottom: 40,
-        left: 60,
-        right: 60,
-        borderTop: "1px solid #e5e7eb",
-        paddingTop: 12,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: C.navyMid,
+        paddingHorizontal: 48,
+        paddingVertical: 16,
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
     },
     footerText: {
-        fontSize: 8,
-        color: "#9ca3af",
+        fontSize: 7.5,
+        color: "#6B6F8A",
     },
     footerFolio: {
-        fontSize: 8,
-        color: "#0d9488",
+        fontSize: 7.5,
+        color: C.purple,
+        fontFamily: "Helvetica-Bold",
+    },
+    footerDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: C.accent,
+        marginHorizontal: 10,
     },
 });
 
+/* ─── Logo SVG (idéntico al del dashboard) ──────────────────────────── */
+function LogoSVG() {
+    return (
+        <Svg width={26} height={26} viewBox="0 0 24 24">
+            <Circle cx="12" cy="12" r="2.5" fill={C.white} opacity={0.95} />
+            <Circle cx="4" cy="4" r="1.8" fill={C.white} opacity={0.5} />
+            <Circle cx="20" cy="4" r="1.8" fill={C.white} opacity={0.5} />
+            <Circle cx="4" cy="20" r="1.8" fill={C.white} opacity={0.5} />
+            <Circle cx="20" cy="20" r="1.8" fill={C.white} opacity={0.5} />
+            <Line x1="5.3" y1="5.3" x2="10.2" y2="10.2" stroke={C.white} strokeWidth={1} opacity={0.35} />
+            <Line x1="18.7" y1="5.3" x2="13.8" y2="10.2" stroke={C.white} strokeWidth={1} opacity={0.35} />
+            <Line x1="5.3" y1="18.7" x2="10.2" y2="13.8" stroke={C.white} strokeWidth={1} opacity={0.35} />
+            <Line x1="18.7" y1="18.7" x2="13.8" y2="13.8" stroke={C.white} strokeWidth={1} opacity={0.35} />
+        </Svg>
+    );
+}
+
+/* ─── Props ─────────────────────────────────────────────────────────── */
 interface CertificadoPDFProps {
     estudiante: string;
     codigoUsta: string;
@@ -160,6 +325,7 @@ interface CertificadoPDFProps {
     folio: string;
 }
 
+/* ─── Componente principal ──────────────────────────────────────────── */
 export default function CertificadoPDF({
     estudiante, codigoUsta, programa, empresa,
     cargo, fechaInicio, fechaFin, totalReportes,
@@ -170,106 +336,136 @@ export default function CertificadoPDF({
             title={`Certificado de Práctica — ${estudiante}`}
             author="SIGP-IT"
             subject="Constancia de Práctica Profesional"
+            creator="SIGP-IT · Sistema Integral de Gestión de Prácticas"
         >
             <Page size="A4" style={styles.page}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                        <View style={styles.logoBox}>
-                            <Text style={styles.logoText}>SIGP</Text>
+
+                {/* ── Header oscuro ── */}
+                <View style={styles.headerBand}>
+                    <View style={styles.headerLeft}>
+                        <View style={styles.logoWrap}>
+                            <LogoSVG />
                         </View>
                         <View>
-                            <Text style={styles.orgName}>SIGP-IT</Text>
-                            <Text style={styles.orgSub}>Sistema Integral de Gestión de Prácticas</Text>
-                            <Text style={styles.orgSub}>Ingeniería de Telecomunicaciones</Text>
+                            <Text style={styles.brandName}>SIGP-IT</Text>
+                            <Text style={styles.brandSub}>Sistema Integral de Gestión de Prácticas</Text>
+                            <Text style={styles.brandSub}>Ingeniería de Telecomunicaciones</Text>
                         </View>
                     </View>
-                    <View>
-                        <Text style={styles.fechaText}>Folio: {folio}</Text>
-                        <Text style={styles.fechaText}>Expedido: {generadoEn}</Text>
+                    <View style={styles.folioBox}>
+                        <Text style={styles.folioLabel}>Folio</Text>
+                        <Text style={styles.folioValue}>{folio}</Text>
+                        <Text style={styles.folioDate}>Expedido: {generadoEn}</Text>
                     </View>
                 </View>
 
-                {/* Título */}
-                <Text style={styles.titulo}>CONSTANCIA DE PRÁCTICA PROFESIONAL</Text>
-                <Text style={styles.subtitulo}>
-                    Documento oficial generado por el sistema SIGP-IT
-                </Text>
+                {/* ── Barra de acento ── */}
+                <View style={styles.accentBar}>
+                    <View style={styles.accentBarInner} />
+                </View>
 
-                {/* Cuerpo */}
-                <Text style={styles.parrafo}>
-                    La empresa{" "}
-                    <Text style={styles.destacado}>{empresa}</Text>
-                    {" "}hace constar que el/la estudiante{" "}
-                    <Text style={styles.destacado}>{estudiante}</Text>
-                    {" "}identificado/a con código institucional{" "}
-                    <Text style={styles.destacado}>{codigoUsta || "N/A"}</Text>
-                    {" "}del programa de{" "}
-                    <Text style={styles.destacado}>
-                        {programa || "Ingeniería de Telecomunicaciones"}
+                {/* ── Cuerpo ── */}
+                <View style={styles.body}>
+
+                    {/* Sello oficial */}
+                    <View style={styles.sealRow}>
+                        <View style={styles.sealLine} />
+                        <View style={styles.sealTag}>
+                            <Text style={styles.sealTagText}>✦  Documento Oficial  ✦</Text>
+                        </View>
+                        <View style={styles.sealLine} />
+                    </View>
+
+                    {/* Título */}
+                    <Text style={styles.titulo}>CONSTANCIA DE PRÁCTICA PROFESIONAL</Text>
+                    <Text style={styles.subtitulo}>
+                        Generado digitalmente por la plataforma SIGP-IT · Válido sin firma manuscrita
                     </Text>
-                    {", realizó su práctica profesional en esta empresa satisfactoriamente."}
-                </Text>
 
-                {/* Tabla de datos */}
-                <View style={styles.tabla}>
-                    <View style={styles.tablaFila}>
-                        <View style={styles.tablaCelda}>
-                            <Text style={styles.tablaCeldaLabel}>Cargo desempeñado</Text>
-                            <Text style={styles.tablaCeldaValor}>{cargo || "Practicante"}</Text>
+                    {/* Párrafo 1 */}
+                    <Text style={styles.parrafo}>
+                        La empresa{" "}
+                        <Text style={styles.bold}>{empresa}</Text>
+                        {", representada por "}
+                        <Text style={styles.bold}>{representante}</Text>
+                        {", hace constar que el/la estudiante "}
+                        <Text style={styles.bold}>{estudiante}</Text>
+                        {", identificado/a con código institucional "}
+                        <Text style={styles.bold}>{codigoUsta || "N/A"}</Text>
+                        {", perteneciente al programa de "}
+                        <Text style={styles.bold}>{programa || "Ingeniería de Telecomunicaciones"}</Text>
+                        {", realizó su práctica profesional en esta empresa de manera satisfactoria, cumpliendo con todas las responsabilidades asignadas."}
+                    </Text>
+
+                    {/* Tabla de datos */}
+                    <View style={styles.tabla}>
+                        <View style={styles.tablaHeader}>
+                            <Text style={[styles.tablaHeaderText, { flex: 1 }]}>Cargo</Text>
+                            <Text style={[styles.tablaHeaderText, { flex: 1 }]}>Reportes aprobados</Text>
                         </View>
-                        <View style={styles.tablaCelda}>
-                            <Text style={styles.tablaCeldaLabel}>Reportes entregados</Text>
-                            <Text style={styles.tablaCeldaValor}>{totalReportes} reporte(s)</Text>
+                        <View style={styles.tablaFila}>
+                            <View style={styles.tablaCelda}>
+                                <Text style={styles.tablaCeldaLabel}>Cargo desempeñado</Text>
+                                <Text style={styles.tablaCeldaValor}>{cargo || "Practicante"}</Text>
+                            </View>
+                            <View style={styles.tablaCeldaUltima}>
+                                <Text style={styles.tablaCeldaLabel}>Total de reportes verificados</Text>
+                                <Text style={styles.tablaCeldaValorAccent}>{totalReportes} reporte(s)</Text>
+                            </View>
+                        </View>
+                        <View style={styles.tablaFilaAlterna}>
+                            <View style={styles.tablaCelda}>
+                                <Text style={styles.tablaCeldaLabel}>Fecha de inicio</Text>
+                                <Text style={styles.tablaCeldaValor}>{fechaInicio}</Text>
+                            </View>
+                            <View style={styles.tablaCeldaUltima}>
+                                <Text style={styles.tablaCeldaLabel}>Fecha de finalización</Text>
+                                <Text style={styles.tablaCeldaValor}>{fechaFin}</Text>
+                            </View>
                         </View>
                     </View>
-                    <View style={styles.tablaFilaAlterna}>
-                        <View style={styles.tablaCelda}>
-                            <Text style={styles.tablaCeldaLabel}>Fecha de inicio</Text>
-                            <Text style={styles.tablaCeldaValor}>{fechaInicio}</Text>
+
+                    {/* Párrafo 2 */}
+                    <Text style={styles.parrafo}>
+                        {"Durante su período de práctica, el/la estudiante demostró responsabilidad, iniciativa y compromiso en el cumplimiento de sus funciones. Se entregaron un total de "}
+                        <Text style={styles.bold}>{totalReportes} reporte(s)</Text>
+                        {" de seguimiento, los cuales fueron revisados, verificados y aprobados a través de la plataforma digital SIGP-IT."}
+                    </Text>
+
+                    <Text style={styles.parrafo}>
+                        {"Esta constancia se expide a solicitud del/la interesado/a para los fines que estime convenientes, en la fecha indicada en el presente documento. Su autenticidad puede verificarse mediante el folio "}
+                        <Text style={styles.bold}>{folio}</Text>
+                        {" en el sistema SIGP-IT."}
+                    </Text>
+
+                    {/* Firmas */}
+                    <View style={styles.firmaSection}>
+                        <View style={styles.firmaBox}>
+                            <View style={styles.firmaLinea} />
+                            <Text style={styles.firmaNombre}>{representante}</Text>
+                            <Text style={styles.firmaCargo}>Representante Legal / Supervisor</Text>
+                            <Text style={styles.firmaEmpresa}>{empresa}</Text>
                         </View>
-                        <View style={styles.tablaCelda}>
-                            <Text style={styles.tablaCeldaLabel}>Fecha de finalización</Text>
-                            <Text style={styles.tablaCeldaValor}>{fechaFin}</Text>
+                        <View style={styles.firmaBox}>
+                            <View style={styles.firmaLinea} />
+                            <Text style={styles.firmaNombre}>{estudiante}</Text>
+                            <Text style={styles.firmaCargo}>Estudiante Practicante</Text>
+                            <Text style={styles.firmaCargo}>{programa || "Ing. Telecomunicaciones"}</Text>
                         </View>
                     </View>
                 </View>
 
-                <Text style={styles.parrafo}>
-                    {"Durante su periodo de práctica, el/la estudiante demostró responsabilidad y compromiso en el cumplimiento de sus funciones, entregando un total de "}
-                    <Text style={styles.destacado}>{totalReportes} reporte(s)</Text>
-                    {" de seguimiento verificados y aprobados a través de la plataforma SIGP-IT."}
-                </Text>
-
-                <Text style={styles.parrafo}>
-                    {"Esta constancia se expide a solicitud del interesado/a para los fines que estime conveniente, en la fecha indicada en el presente documento."}
-                </Text>
-
-                {/* Firmas */}
-                <View style={styles.firmaSection}>
-                    <View style={styles.firmaBox}>
-                        <View style={styles.firmaLinea} />
-                        <Text style={styles.firmaNombre}>{representante}</Text>
-                        <Text style={styles.firmaCargo}>Representante de la Empresa</Text>
-                        <Text style={styles.firmaCargo}>{empresa}</Text>
-                    </View>
-                    <View style={styles.firmaBox}>
-                        <View style={styles.firmaLinea} />
-                        <Text style={styles.firmaNombre}>{estudiante}</Text>
-                        <Text style={styles.firmaCargo}>Estudiante Practicante</Text>
-                        <Text style={styles.firmaCargo}>
-                            {programa || "Ing. Telecomunicaciones"}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Footer */}
+                {/* ── Footer oscuro ── */}
                 <View style={styles.footer} fixed>
                     <Text style={styles.footerText}>
-                        SIGP-IT — Sistema Integral de Gestión de Prácticas
+                        SIGP-IT · Sistema Integral de Gestión de Prácticas · Documento generado digitalmente
                     </Text>
-                    <Text style={styles.footerFolio}>Folio: {folio}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <View style={styles.footerDot} />
+                        <Text style={styles.footerFolio}>{folio}</Text>
+                    </View>
                 </View>
+
             </Page>
         </Document>
     );
