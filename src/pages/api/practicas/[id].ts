@@ -11,6 +11,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { id } = req.query as { id: string };
 
+    if (req.method === "GET") {
+        const practica = await prisma.practica.findUnique({
+            where: { id },
+            include: {
+                estudiante: { include: { user: true } },
+                empresa: true,
+                documentos: { orderBy: { createdAt: "asc" } },
+            },
+        });
+
+        if (!practica) return res.status(404).json({ message: "Práctica no encontrada" });
+        return res.status(200).json({ practica });
+    }
+
     if (req.method === "PATCH") {
         const { activa, quedoContratado, fechaFin } = req.body;
 
@@ -31,4 +45,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(405).json({ message: "Método no permitido" });
-}
+}

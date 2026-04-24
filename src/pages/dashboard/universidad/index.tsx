@@ -73,7 +73,7 @@ function ActionBtn({ onClick, color, children }: { onClick: () => void; color: "
     const [hov, setHov] = useState(false);
     const col = color === "uni" ? "var(--color-role-universidad)" : "var(--color-role-empresa)";
     const bg = color === "uni" ? "var(--color-role-universidad-bg)" : "var(--color-role-empresa-bg)";
-    const bdr = color === "uni" ? "rgba(99,102,241,0.25)" : "rgba(245,130,32,0.25)";
+    const bdr = color === "uni" ? "rgba(167,139,250,0.3)" : "rgba(52,211,153,0.3)";
     return (
         <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
             style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "var(--radius-md)", border: `1px solid ${bdr}`, backgroundColor: hov ? bg : "transparent", color: col, fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "background var(--transition-fast)" }}>

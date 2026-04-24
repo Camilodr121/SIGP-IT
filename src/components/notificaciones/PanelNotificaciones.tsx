@@ -97,16 +97,16 @@ export default function PanelNotificaciones({
             ref={panelRef}
             className="animate-scale-in"
             style={{
-                position: "absolute",
-                right: 0,
-                top: "calc(100% + 8px)",
+                position: "fixed",
+                right: "20px",
+                top: "60px",
                 width: "320px",
                 backgroundColor: "var(--color-surface-2)",
                 border: "1px solid var(--color-border-medium)",
                 borderRadius: "var(--radius-xl)",
                 boxShadow: "var(--shadow-xl)",
                 overflow: "hidden",
-                zIndex: 50,
+                zIndex: 9999,
                 transformOrigin: "top right",
             }}
         >
