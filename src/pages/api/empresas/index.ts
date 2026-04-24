@@ -4,16 +4,20 @@ import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getSession({ req });
-    if (!session || session.user.role !== "UNIVERSIDAD")
+    if (!session || !["UNIVERSIDAD", "ESTUDIANTE"].includes(session.user.role))
         return res.status(401).json({ message: "No autorizado" });
 
     if (req.method === "GET") {
         const empresas = await prisma.perfilEmpresa.findMany({
-            include: { user: { select: { id: true, name: true, email: true } } },
+            include: {
+                user: { select: { id: true, name: true, email: true } },
+                practicas: { select: { quedoContratado: true } },
+            },
             orderBy: { createdAt: "desc" },
         });
         return res.status(200).json({ data: empresas });
     }
+
 
     if (req.method === "POST") {
         const { nombreEmpresa, nit, sector, ciudad, telefono } = req.body;

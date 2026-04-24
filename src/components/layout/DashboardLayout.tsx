@@ -487,6 +487,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                         backdropFilter: "blur(16px)",
                         WebkitBackdropFilter: "blur(16px)",
                         borderBottom: "1px solid var(--color-border)",
+                        position: "relative",
+                        zIndex: 100,
                     }}>
                         <h1 style={{
                             fontSize: "14px",
@@ -576,6 +578,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                             flex: 1,
                             overflowY: "auto",
                             padding: "20px",
+                            position: "relative",
+                            zIndex: 1,
                         }}
                     >
                         {children}
