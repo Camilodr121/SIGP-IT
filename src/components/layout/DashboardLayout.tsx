@@ -49,8 +49,8 @@ const NAV_UNIVERSIDAD = [
 const NAV_EMPRESA = [
     { href: "/dashboard/empresa", icon: <LayoutDashboard size={15} />, label: "Inicio" },
     { href: "/dashboard/empresa/practicantes", icon: <Users size={15} />, label: "Practicantes" },
-    { href: "/dashboard/empresa/reportes", icon: <FileText size={15} />, label: "Reportes" },
-    { href: "/dashboard/empresa/analiticas", icon: <TrendingUp size={15} />, label: "Analíticas" },
+    { href: "/dashboard/empresa/documentos", icon: <FileText size={15} />, label: "Reportes" },
+    { href: "/dashboard/empresa/estadisticas", icon: <TrendingUp size={15} />, label: "Analíticas" },
 ];
 
 const NAV_MAP: Record<string, typeof NAV_ESTUDIANTE> = {
