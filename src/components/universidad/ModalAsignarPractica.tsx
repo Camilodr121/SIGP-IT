@@ -1,6 +1,6 @@
 //src/components/universidad/ModalAsignarPractica.tsx
 import { useState, useEffect, useRef } from "react";
-import { X, Briefcase, Loader2, AlertCircle } from "lucide-react";
+import { X, Briefcase, Loader2, AlertCircle, ChevronDown, Check } from "lucide-react";
 
 interface Props {
     onClose: () => void;
@@ -97,6 +97,111 @@ function UserStrip({ name, email, accentColor, accentBg, letter }: { name: strin
                 <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--color-text-muted)", margin: 0 }}>{name ?? "—"}</p>
                 <p style={{ fontSize: "10px", color: "var(--color-text-faint)", margin: 0 }}>{email}</p>
             </div>
+        </div>
+    );
+}
+
+/* ─── CustomSelect — dropdown oscuro controlado ─────────────────────── */
+interface SelectOption { value: string; label: string; }
+function CustomSelect({
+    value, onChange, options, placeholder, accentColor, focused, onFocus, onBlur,
+}: {
+    value: string; onChange: (v: string) => void; options: SelectOption[];
+    placeholder: string; accentColor: string; focused: boolean;
+    onFocus: () => void; onBlur: () => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const selectedLabel = options.find(o => o.value === value)?.label ?? placeholder;
+
+    // Cerrar al hacer clic fuera
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false); onBlur();
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [open, onBlur]);
+
+    const ACCENT = accentColor;
+    const isFocused = open || focused;
+
+    return (
+        <div ref={ref} style={{ position: "relative" }}>
+            {/* Trigger */}
+            <button
+                type="button"
+                onClick={() => { setOpen(p => !p); if (!open) onFocus(); else onBlur(); }}
+                style={{
+                    width: "100%", padding: "9px 36px 9px 12px",
+                    backgroundColor: isFocused ? "rgba(255,255,255,0.06)" : "rgba(13,14,21,0.8)",
+                    border: `1px solid ${isFocused ? ACCENT + "80" : "var(--color-border)"}`,
+                    borderRadius: "var(--radius-lg)",
+                    color: value ? "var(--color-text)" : "var(--color-text-faint)",
+                    fontSize: "12px", textAlign: "left", cursor: "pointer",
+                    outline: "none", transition: "all 150ms ease",
+                    boxShadow: isFocused ? `0 0 0 3px ${ACCENT}18` : "none",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                }}
+            >
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                    {selectedLabel}
+                </span>
+                <ChevronDown size={13} style={{
+                    color: "var(--color-text-faint)", flexShrink: 0, marginLeft: 8,
+                    transition: "transform 200ms ease",
+                    transform: open ? "rotate(180deg)" : "rotate(0deg)",
+                }} />
+            </button>
+
+            {/* Popup */}
+            {open && (
+                <div style={{
+                    position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
+                    backgroundColor: "rgba(10,11,18,0.98)",
+                    backdropFilter: "blur(20px)",
+                    border: `1px solid ${ACCENT}50`,
+                    borderRadius: "var(--radius-lg)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+                    zIndex: 9999,
+                    overflow: "hidden",
+                    maxHeight: "220px",
+                    overflowY: "auto",
+                }}>
+                    {options.map((opt, i) => {
+                        const isSelected = opt.value === value;
+                        const isPlaceholder = opt.value === "";
+                        return (
+                            <button
+                                key={opt.value + i}
+                                type="button"
+                                onClick={() => { onChange(opt.value); setOpen(false); onBlur(); }}
+                                style={{
+                                    width: "100%", padding: "9px 12px",
+                                    backgroundColor: isSelected ? `${ACCENT}20` : "transparent",
+                                    border: "none",
+                                    color: isPlaceholder ? "var(--color-text-faint)" : isSelected ? ACCENT : "var(--color-text)",
+                                    fontSize: "12px", textAlign: "left", cursor: "pointer",
+                                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                                    gap: 8, transition: "background 100ms ease",
+                                    fontWeight: isSelected ? 600 : 400,
+                                    borderBottom: i < options.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                                }}
+                                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)"; }}
+                                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = "transparent"; }}
+                            >
+                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {opt.label}
+                                </span>
+                                {isSelected && <Check size={11} style={{ flexShrink: 0, color: ACCENT }} />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }
@@ -241,16 +346,22 @@ export default function ModalAsignarPractica({ onClose, onSuccess }: Props) {
                 <form onSubmit={handleSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
 
                     <Field label="Estudiante" required>
-                        <select name="estudianteId" value={form.estudianteId} onChange={handleChange}
-                            onFocus={() => setFocused("estudianteId")} onBlur={() => setFocused("")}
-                            style={{ ...fStyle("estudianteId"), appearance: "none" }}>
-                            <option value="">Selecciona un estudiante</option>
-                            {estudiantes.map(u => (
-                                <option key={u.id} value={u.id}>
-                                    {u.name} — {u.perfilEstudiante?.codigoUsta ?? u.email}
-                                </option>
-                            ))}
-                        </select>
+                        <CustomSelect
+                            value={form.estudianteId}
+                            onChange={v => setForm(p => ({ ...p, estudianteId: v }))}
+                            placeholder="Selecciona un estudiante"
+                            accentColor={AC}
+                            focused={focused === "estudianteId"}
+                            onFocus={() => setFocused("estudianteId")}
+                            onBlur={() => setFocused("")}
+                            options={[
+                                { value: "", label: "Selecciona un estudiante" },
+                                ...estudiantes.map((u: any) => ({
+                                    value: u.id,
+                                    label: `${u.name ?? u.email} — ${u.perfilEstudiante?.codigoUsta ?? u.email}`,
+                                }))
+                            ]}
+                        />
                         {estudiantes.length === 0 && (
                             <p style={{ fontSize: "11px", color: "var(--color-warning)", margin: "2px 0 0" }}>
                                 No hay estudiantes con perfil. Crea perfiles primero.
@@ -259,16 +370,22 @@ export default function ModalAsignarPractica({ onClose, onSuccess }: Props) {
                     </Field>
 
                     <Field label="Empresa" required>
-                        <select name="empresaId" value={form.empresaId} onChange={handleChange}
-                            onFocus={() => setFocused("empresaId")} onBlur={() => setFocused("")}
-                            style={{ ...fStyle("empresaId"), appearance: "none" }}>
-                            <option value="">Selecciona una empresa</option>
-                            {empresas.map(u => (
-                                <option key={u.id} value={u.id}>
-                                    {u.perfilEmpresa?.nombreEmpresa} — {u.perfilEmpresa?.ciudad ?? u.email}
-                                </option>
-                            ))}
-                        </select>
+                        <CustomSelect
+                            value={form.empresaId}
+                            onChange={v => setForm(p => ({ ...p, empresaId: v }))}
+                            placeholder="Selecciona una empresa"
+                            accentColor={AC}
+                            focused={focused === "empresaId"}
+                            onFocus={() => setFocused("empresaId")}
+                            onBlur={() => setFocused("")}
+                            options={[
+                                { value: "", label: "Selecciona una empresa" },
+                                ...empresas.map((u: any) => ({
+                                    value: u.id,
+                                    label: `${u.perfilEmpresa?.nombreEmpresa ?? u.name} — ${u.perfilEmpresa?.ciudad ?? u.email}`,
+                                }))
+                            ]}
+                        />
                         {empresas.length === 0 && (
                             <p style={{ fontSize: "11px", color: "var(--color-warning)", margin: "2px 0 0" }}>
                                 No hay empresas con perfil. Crea perfiles primero.

@@ -353,7 +353,7 @@ export default function DashboardUniversidad() {
                                             {sinPerfil(empresas, "perfilEmpresa").map((u: any) => (
                                                 <div key={u.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 8px", borderRadius: "var(--radius-lg)" }}>
                                                     <p style={{ fontSize: "12px", color: "var(--color-text-muted)", margin: 0 }}>{u.name ?? u.email}</p>
-                                                    <ActionBtn color="empresa" onClick={() => setModal({ tipo: "perfilEmpresa", usuario: u })}>Crear perfil</ActionBtn>
+                                                    <ActionBtn color="uni" onClick={() => setModal({ tipo: "perfilEmpresa", usuario: u })}>Crear perfil</ActionBtn>
                                                 </div>
                                             ))}
                                         </div>
