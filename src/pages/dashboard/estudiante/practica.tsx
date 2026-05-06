@@ -7,7 +7,7 @@ import EstadoBadge from "@/components/ui/EstadoBadge";
 import ModalSubirDocumento, { TipoDocumento } from "@/components/documentos/ModalSubirDocumento";
 import {
     Building2, Calendar, Briefcase, FileText, CheckCircle, Loader2,
-    Upload, ExternalLink, Lock, ChevronDown, ChevronUp, Clock,
+    Upload, ExternalLink, Lock, ChevronDown, ChevronUp, Clock, Award,
 } from "lucide-react";
 
 /* ── helpers ─────────────────────────────────────────────────────── */
@@ -206,9 +206,13 @@ export default function PracticaPage() {
     useEffect(() => { fetchDatos(); }, [fetchDatos]);
 
     const practicaActiva = practicas.find(p => p.activa);
-    const practicasAnter = practicas.filter(p => !p.activa);
-    const todosLosDocs = practicaActiva?.documentos ?? [];
-    const faseActivaIdx = practicaActiva ? calcularFaseActiva(todosLosDocs) : 0;
+    // La práctica a mostrar: activa o la más reciente finalizada
+    const practicaMostrar = practicaActiva ?? practicas[0] ?? null;
+    const practicasAnter = practicaActiva
+        ? practicas.filter(p => !p.activa)
+        : practicas.slice(1);
+    const todosLosDocs = practicaMostrar?.documentos ?? [];
+    const faseActivaIdx = practicaMostrar ? calcularFaseActiva(todosLosDocs) : 0;
 
     return (
         <DashboardLayout title="Mi Práctica">
@@ -228,7 +232,7 @@ export default function PracticaPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0" }}>
                     <Loader2 size={26} style={{ color: "var(--color-role-estudiante)", animation: "spin 0.8s linear infinite" }} />
                 </div>
-            ) : !practicaActiva ? (
+            ) : !practicaMostrar ? (
                 /* Empty state */
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 24px", gap: "10px", backgroundColor: "rgba(13,14,21,0.45)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-xl)" }}>
                     <Briefcase size={30} style={{ color: "var(--color-text-faint)" }} />
@@ -238,22 +242,38 @@ export default function PracticaPage() {
             ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "14px", opacity: mounted ? 1 : 0, transition: "opacity 400ms ease 100ms" }}>
 
+                    {/* Banner práctica finalizada */}
+                    {!practicaActiva && practicaMostrar && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", backgroundColor: "rgba(52,201,122,0.05)", border: "1px solid rgba(52,201,122,0.2)", borderRadius: "var(--radius-xl)" }}>
+                            <CheckCircle size={16} style={{ color: "var(--color-success)", flexShrink: 0 }} />
+                            <div>
+                                <p style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-success)", margin: "0 0 1px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Práctica finalizada</p>
+                                <p style={{ fontSize: "11px", color: "var(--color-text-muted)", margin: 0 }}>Esta es la última práctica registrada. El historial de documentos se conserva a continuación.</p>
+                            </div>
+                            {practicaMostrar.quedoContratado && (
+                                <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "4px", padding: "3px 9px", borderRadius: "var(--radius-full)", backgroundColor: "var(--color-success-bg)", border: "1px solid rgba(52,201,122,0.2)", fontSize: "10px", fontWeight: 600, color: "var(--color-success)", flexShrink: 0 }}>
+                                    <Award size={10} />Contratado
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     {/* ── Tarjeta de info de la práctica ── */}
                     <div style={{ padding: "16px", backgroundColor: "rgba(13,14,21,0.45)", backdropFilter: "blur(8px)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-xl)" }}>
                         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
                             <div>
                                 <p style={{ fontSize: "15px", fontWeight: 700, color: "var(--color-text)", margin: "0 0 3px", letterSpacing: "-0.01em" }}>
-                                    {practicaActiva.empresa?.nombreEmpresa ?? "Empresa"}
+                                    {practicaMostrar.empresa?.nombreEmpresa ?? "Empresa"}
                                 </p>
-                                <p style={{ fontSize: "11px", color: "var(--color-text-faint)", margin: 0 }}>{practicaActiva.descripcionCargo ?? "Práctica profesional"}</p>
+                                <p style={{ fontSize: "11px", color: "var(--color-text-faint)", margin: 0 }}>{practicaMostrar.descripcionCargo ?? "Práctica profesional"}</p>
                             </div>
-                            <EstadoBadge estado={practicaActiva.activa ? "APROBADO" : "RECHAZADO"} />
+                            <EstadoBadge estado={practicaMostrar.activa ? "APROBADO" : "RECHAZADO"} />
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: "12px", paddingTop: "12px", borderTop: "1px solid var(--color-border)" }}>
-                            <MetaItem label="Empresa" value={practicaActiva.empresa?.nombreEmpresa ?? "—"} icon={<Building2 size={11} />} />
-                            <MetaItem label="Cargo" value={practicaActiva.descripcionCargo ?? "—"} icon={<Briefcase size={11} />} />
-                            <MetaItem label="Inicio" value={fmt(practicaActiva.fechaInicio)} icon={<Calendar size={11} />} />
-                            {practicaActiva.fechaFin && <MetaItem label="Fin" value={fmt(practicaActiva.fechaFin)} icon={<Calendar size={11} />} />}
+                            <MetaItem label="Empresa" value={practicaMostrar.empresa?.nombreEmpresa ?? "—"} icon={<Building2 size={11} />} />
+                            <MetaItem label="Cargo" value={practicaMostrar.descripcionCargo ?? "—"} icon={<Briefcase size={11} />} />
+                            <MetaItem label="Inicio" value={fmt(practicaMostrar.fechaInicio)} icon={<Calendar size={11} />} />
+                            {practicaMostrar.fechaFin && <MetaItem label="Fin" value={fmt(practicaMostrar.fechaFin)} icon={<Calendar size={11} />} />}
                             <MetaItem label="Documentos" value={`${todosLosDocs.length} entregado${todosLosDocs.length !== 1 ? "s" : ""}`} icon={<FileText size={11} />} />
                         </div>
                     </div>
@@ -273,10 +293,11 @@ export default function PracticaPage() {
                         {FASES.map((fase, idx) => {
                             const docsFase = todosLosDocs.filter((d: any) => (d.tipoDocumento ?? "INICIACION") === fase.id);
                             const desbloqueada = idx <= faseActivaIdx;
-                            const esActiva = idx === faseActivaIdx;
+                            // Si la práctica está finalizada, no hay fase activa para subir
+                            const esActiva = practicaActiva ? idx === faseActivaIdx : false;
                             return (
                                 <FaseCard key={fase.id} fase={fase} docs={docsFase} desbloqueada={desbloqueada} esActiva={esActiva}
-                                    practicaId={practicaActiva.id} onSubidaExitosa={fetchDatos} />
+                                    practicaId={practicaMostrar.id} onSubidaExitosa={fetchDatos} />
                             );
                         })}
                     </div>

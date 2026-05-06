@@ -11,7 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const empresas = await prisma.perfilEmpresa.findMany({
             include: {
                 user: { select: { id: true, name: true, email: true } },
-                practicas: { select: { quedoContratado: true } },
+                practicas: {
+                    select: { quedoContratado: true, activa: true },
+                },
+                _count: { select: { practicas: true } },
             },
             orderBy: { createdAt: "desc" },
         });

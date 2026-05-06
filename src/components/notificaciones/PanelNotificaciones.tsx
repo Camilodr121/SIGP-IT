@@ -35,6 +35,11 @@ const TIPO_CONFIG: Record<string, {
         color: "var(--color-role-universidad)",
         bg: "var(--color-role-universidad-bg)",
     },
+    PRACTICA_FINALIZADA: {
+        icon: <Award size={13} />,
+        color: "var(--color-success)",
+        bg: "var(--color-success-bg)",
+    },
 };
 
 const FALLBACK_CONFIG = {

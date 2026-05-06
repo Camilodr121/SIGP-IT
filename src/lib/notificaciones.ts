@@ -4,7 +4,8 @@ type TipoNotificacion =
     | "REPORTE_SUBIDO"
     | "DOCUMENTO_APROBADO"
     | "DOCUMENTO_RECHAZADO"
-    | "PRACTICA_ASIGNADA";
+    | "PRACTICA_ASIGNADA"
+    | "PRACTICA_FINALIZADA";
 
 interface CrearNotificacionParams {
     userId: string;

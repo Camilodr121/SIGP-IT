@@ -7,6 +7,7 @@ import ModalCrearPerfilEmpresa from "@/components/universidad/ModalCrearPerfilEm
 import ModalCrearPerfilEstudiante from "@/components/universidad/ModalCrearPerfilEstudiante";
 import ModalAsignarPractica from "@/components/universidad/ModalAsignarPractica";
 import ModalCrearEmpresa from "@/components/universidad/ModalCrearEmpresa";  // ← NUEVO
+import KpiCard from "@/components/ui/KpiCard";
 import {
     GraduationCap, Building2, Briefcase, Plus,
     CheckCircle, AlertCircle, Loader2, Users,
@@ -146,33 +147,10 @@ function TabBar({ activa, onChange }: { activa: TabId; onChange: (id: TabId) => 
 
 
 /* ─────────────────────────────────────────────────────────────────────────
-   KPI Card
+   KPI Config
 ───────────────────────────────────────────────────────────────────────── */
 interface StatCfg { label: string; valor: string | number; sub: string; icon: JSX.Element; color: string; bg: string; border: string; }
 
-
-function KpiCard({ s, delay, mounted }: { s: StatCfg; delay: number; mounted: boolean }) {
-    const [hov, setHov] = useState(false);
-    return (
-        <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-            style={{
-                position: "relative", backgroundColor: hov ? "var(--color-surface-hover)" : "rgba(13,14,21,0.55)",
-                backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-                border: `1px solid ${hov ? s.border : "var(--color-border)"}`,
-                borderRadius: "var(--radius-xl)", padding: "16px", overflow: "hidden",
-                transition: "background 160ms ease,border-color 160ms ease,transform 160ms ease,box-shadow 160ms ease",
-                transform: hov ? "translateY(-2px)" : "translateY(0)",
-                boxShadow: hov ? "0 8px 24px rgba(0,0,0,0.35)" : "none",
-                opacity: mounted ? 1 : 0, transitionDelay: `${delay}ms`,
-            }}>
-            <div style={{ position: "absolute", top: "-16px", right: "-16px", width: "64px", height: "64px", borderRadius: "50%", backgroundColor: s.bg, filter: "blur(20px)", opacity: hov ? 0.7 : 0, transition: "opacity 200ms ease", pointerEvents: "none" }} />
-            <div style={{ display: "inline-flex", padding: "7px", borderRadius: "var(--radius-md)", backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}`, marginBottom: "10px" }}>{s.icon}</div>
-            <p style={{ fontSize: "26px", fontWeight: 700, color: "var(--color-text)", margin: "0 0 1px", lineHeight: 1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>{s.valor}</p>
-            <p style={{ fontSize: "11px", color: "var(--color-text-muted)", margin: "0 0 1px", fontWeight: 500 }}>{s.label}</p>
-            <p style={{ fontSize: "10px", color: "var(--color-text-faint)", margin: 0 }}>{s.sub}</p>
-        </div>
-    );
-}
 
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -297,8 +275,19 @@ export default function DashboardUniversidad() {
 
 
             {/* ── KPI GRID ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px", marginBottom: "16px" }}>
-                {stats.map((s, i) => <KpiCard key={s.label} s={s} delay={i * 50} mounted={mounted} />)}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: "12px", marginBottom: "18px" }}>
+                {stats.map((s, i) => (
+                    <KpiCard
+                        key={s.label}
+                        label={s.label}
+                        valor={s.valor}
+                        sub={s.sub}
+                        icon={s.icon}
+                        color={s.color}
+                        delay={i * 55}
+                        mounted={mounted}
+                    />
+                ))}
             </div>
 
 
@@ -418,24 +407,6 @@ export default function DashboardUniversidad() {
                         {/* ══ TAB: EMPRESAS ══ */}
                         {tabActiva === "empresas" && (
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-
-                                {/* Botón agregar empresa dentro del tab también */}
-                                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "4px" }}>
-                                    <button
-                                        onClick={() => setModal({ tipo: "crearEmpresa" })}
-                                        style={{
-                                            display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px",
-                                            borderRadius: "var(--radius-lg)", border: "1px solid rgba(167,139,250,0.3)",
-                                            backgroundColor: "transparent", color: "var(--color-role-universidad)",
-                                            fontSize: "11px", fontWeight: 600, cursor: "pointer",
-                                            transition: "background var(--transition-fast)",
-                                        }}
-                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "var(--color-role-universidad-bg)"; }}
-                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                                    >
-                                        <Building2 size={12} /><Plus size={10} />Agregar empresa
-                                    </button>
-                                </div>
 
                                 {empresas.length === 0 && <EmptyCard icon={<Building2 size={18} />} label="Sin empresas registradas" />}
                                 {empresas.map((u: any) => (
